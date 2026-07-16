@@ -1,0 +1,4347 @@
+{
+  "name": "Rioo Revenue Engine v2 \u2014 Loop Fixed 1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ingest-lead",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "5ce1b5c6-c0f8-49e5-a325-454be00d29c1",
+      "name": "WEBHOOK \u2014 Ingest Manual Lead1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1680,
+        496
+      ],
+      "webhookId": "rioo-ingest-manual-v2",
+      "notes": "POST body: { name, title, company, email, profile_url, notes }"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ingest-apify",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7aeebd55-0cea-42db-8c81-11ff14201f67",
+      "name": "WEBHOOK \u2014 Trigger Apify Scrape1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2128,
+        304
+      ],
+      "webhookId": "rioo-ingest-apify-v2",
+      "notes": "POST body: { keyword: 'agency founder', max_results: 10 }"
+    },
+    {
+      "parameters": {
+        "path": "dashboard-leads",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c3a20f21-fbc7-481d-a726-4fd86eda503a",
+      "name": "WEBHOOK \u2014 Dashboard: All Leads1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2128,
+        1840
+      ],
+      "webhookId": "rioo-dashboard-leads-v2",
+      "notes": "GET \u2014 returns all leads with stage, score, status for dashboard"
+    },
+    {
+      "parameters": {
+        "path": "dashboard-stats",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c34eee07-9a91-4d88-98a5-33418013c376",
+      "name": "WEBHOOK \u2014 Dashboard: Pipeline Stats1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2128,
+        2064
+      ],
+      "webhookId": "rioo-dashboard-stats-v2",
+      "notes": "GET \u2014 returns counts per stage for pipeline view"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "update-stage",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "145f2267-6e3d-4fa6-9851-fb0bf77a7e30",
+      "name": "WEBHOOK \u2014 Update Lead Stage1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2128,
+        2288
+      ],
+      "webhookId": "rioo-update-stage-v2",
+      "notes": "POST body: { record_id, stage, status } \u2014 manual override from dashboard"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "kw-1",
+              "name": "keyword",
+              "value": "={{ $json.body.keyword || 'agency founder AI' }}",
+              "type": "string"
+            },
+            {
+              "id": "kw-2",
+              "name": "max_results",
+              "value": "={{ $json.body.max_leads || 50 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "071197f4-3840-4180-bdce-4e825d9b8f22",
+      "name": "Parse Apify Params1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1904,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/scary_good_apis~linkedin-search-posts/run-sync-get-dataset-items?token=<YOUR_APIFY_TOKEN>",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filters\": {\n    \"posterType\": \"Person\",\n    \"hasImage\": true,\n    \"hasVideo\": false,\n    \"hasDocument\": false,\n    \"isJobPosting\": false,\n    \"profile\": {\n      \"minFollowerCount\": 100\n    }\n  },\n  \"limiter\": {\n    \"previousPost\": \"urn:li:activity:7250170481335758841\",\n    \"maxTime\": null\n  },\n  \"maxResults\": 10,\n  \"query\": \"{{ $json.keyword }}\"\n}",
+        "options": {}
+      },
+      "id": "2b570835-dc36-40ba-94a6-fd231d4a1093",
+      "name": "Fetch LinkedIn via Apify1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1680,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "n-1",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $json.poster?.name || $json.body?.name || $json.name || 'Unknown' }}"
+            },
+            {
+              "id": "n-2",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.poster?.title || $json.body?.title || $json.title || '' }}"
+            },
+            {
+              "id": "n-3",
+              "name": "company",
+              "type": "string",
+              "value": "={{ $json.poster?.company || $json.body?.company || $json.company || '' }}"
+            },
+            {
+              "id": "n-4",
+              "name": "profile_url",
+              "type": "string",
+              "value": "={{ $json.poster?.profileUrl || $json.poster?.profile_url || $json.body?.profile_url || $json.profile_url || '' }}"
+            },
+            {
+              "id": "n-5",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.poster?.email || $json.body?.email || $json.email || '' }}"
+            },
+            {
+              "id": "n-6",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json.content?.text || $json.content || $json.body?.pain_point || $json.body?.notes || '' }}"
+            },
+            {
+              "id": "n-7",
+              "name": "followers_count",
+              "type": "number",
+              "value": "={{ $json.poster?.followersCount || $json.poster?.followers_count || $json.followers_count || $json.followers || 0 }}"
+            },
+            {
+              "id": "n-8",
+              "name": "source",
+              "type": "string",
+              "value": "={{ $json.poster ? 'linkedin_apify' : 'manual' }}"
+            },
+            {
+              "id": "n-9",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ $now.toISO() }}"
+            },
+            {
+              "id": "n-10",
+              "name": "pain_point_raw",
+              "type": "string",
+              "value": "={{ $json.body?.pain_point || $json.body?.notes || $json.content?.text || $json.content || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1f6479d7-8efe-467b-ad94-cdcc81cdfa45",
+      "name": "Normalize Lead Data1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1456,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "filterByFormula": "={{ $json.profile_url ? \"{Profile URL}='\" + $json.profile_url + \"'\" : \"FALSE()\" }}",
+        "options": {
+          "fields": [
+            "Name",
+            "Profile URL"
+          ]
+        }
+      },
+      "id": "87e97a26-2715-4519-944f-43dcf6a7384e",
+      "name": "Dedup Check1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1024,
+        256
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dedup-cond",
+              "leftValue": "={{ !$json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "5256c6b5-d7bc-4b0b-9f45-df740d875fe0",
+      "name": "Is New Lead?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Qualify this lead for Rioo.\n\nName: {{ $('Normalize Lead Data1').item.json.name }}\nTitle: {{ $('Normalize Lead Data1').item.json.title }}\nCompany: {{ $('Normalize Lead Data1').item.json.companyu }}\nProfile URL: {{ $('Normalize Lead Data1').item.json.profile_url }}\nFollowers: {{ $('Normalize Lead Data1').item.json.followers_count }}\nContent/Notes: {{ $('Normalize Lead Data1').item.json.content }}\npain-point:{{ $('Normalize Lead Data1').item.json.pain_point_raw }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the AI qualification engine for Rioo.\n\nRioo builds AI Operating Systems (AIOS) for founders \u2014 replacing manual ops so founders spend 80% on growth instead of firefighting.\n\nRIOO ICP (Ideal Customer Profile):\n- Role: Founder, CEO, COO, Head of Ops, Director of Operations, VP Growth, Head of Growth\n- Company: Agency, SaaS, Consulting, E-commerce, or Service Business\n- Size: 2 to 200 employees\n- Pain: Manual tasks, disconnected tools, scaling ops, hiring problems, AI curiosity\n- Signal: Posting about scaling, productivity, automation, hiring, funding, growth, operations, AI\n- NOT a fit: Enterprise 500+ employees with large dev teams, pure developers with no ops pain, students\n\nScoring rules (return integer 0-100):\n90-100 = Founder/CEO/COO at ops-heavy business 5-200 employees WITH explicit scaling or automation signal\n70-89 = Founder/CEO at any SMB, OR senior ops/growth role at relevant company with some pain signal\n60-69 = Agency owner, SaaS founder, or relevant ops role even WITHOUT explicit pain signal \u2014 presence in the right role is enough\n50-59 = Growth/marketing/ops role at a company that could benefit, unclear seniority\n30-49 = Tangential fit, could nurture\n0-29 = No fit at all (enterprise, job seeker, student, pure developer)\n\nPriority assignment:\n- score >= 70 \u2192 priority: \"high\"\n- score >= 50 \u2192 priority: \"medium\"  \n- score < 50  \u2192 priority: \"low\"\n\nTemperature assignment:\n- score >= 70 \u2192 temperature: \"hot\"\n- score >= 50 \u2192 temperature: \"warm\"\n- score < 50  \u2192 temperature: \"cold\"\n\nIMPORTANT: When in doubt, score HIGHER not lower. A founder or agency owner should NEVER be below 60. Default score for any founder/CEO is 65 minimum.\n\nReturn ONLY the structured JSON. No extra text."
+        }
+      },
+      "id": "848e38eb-31fc-4c50-bfdb-34873f11bd04",
+      "name": "AI Lead Qualifier1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -576,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "a29f3964-73e1-4848-bdfe-bb2cc5dc5e04",
+      "name": "GPT \u2014 Qualifier Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -560,
+        384
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YoWg5i15AwBaWjTu",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"score\": {\n      \"type\": \"integer\",\n      \"description\": \"0-100 qualification score\"\n    },\n    \"priority\": {\n      \"type\": \"string\",\n      \"enum\": [\"high\", \"medium\", \"low\"]\n    },\n    \"temperature\": {\n      \"type\": \"string\",\n      \"enum\": [\"hot\", \"warm\", \"cold\"]\n    },\n    \"category\": {\n      \"type\": \"string\",\n      \"enum\": [\"agency\", \"saas\", \"ecommerce\", \"other\"]\n    },\n    \"recommended_action\": {\n      \"type\": \"string\",\n      \"enum\": [\"immediate_outreach\", \"nurture\", \"store\"]\n    },\n    \"pain_point\": {\n      \"type\": \"string\",\n      \"description\": \"Primary pain point in max 15 words\"\n    },\n    \"reasoning\": {\n      \"type\": \"string\",\n      \"description\": \"Qualification reasoning in max 25 words\"\n    }\n  },\n  \"required\": [\n    \"score\",\n    \"priority\",\n    \"temperature\",\n    \"category\",\n    \"recommended_action\",\n    \"pain_point\",\n    \"reasoning\"\n  ]\n}"
+      },
+      "id": "c7f0e94e-88b1-41b2-8dfb-88d6db84a358",
+      "name": "Qualifier Structured Output1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "score-cond",
+              "leftValue": "={{ $json.output.score }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "priority-cond",
+              "leftValue": "={{ $json.output.priority }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "351c2c85-16d9-4242-9eba-cdf9c3940486",
+      "name": "Score 60+?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a cold outreach email for this lead.\n\nName: {{ $('Normalize Lead Data1').item.json.name }}\nTitle: {{ $('Normalize Lead Data1').item.json.title }}\nCompany: {{ $('Normalize Lead Data1').item.json.company }}\nPain Point: {{ $('AI Lead Qualifier1').item.json.output.pain_point }}\nCategory: {{ $('AI Lead Qualifier1').item.json.output.category }}\nScore: {{ $('AI Lead Qualifier1').item.json.output.score }}\nReasoning: {{ $('AI Lead Qualifier1').item.json.output.reasoning }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Write a cold outreach email for Rioo \u2014 AI Operating Systems for founders.\n\nRioo's offer: We build an AI OS that replaces 60-70% of manual ops tasks so founders scale without hiring.\n\nEmail rules:\n- Subject: max 8 words, curiosity-driven, specific to them\n- Body: max 120 words, plain text only\n- Open with ONE specific observation about them (role, company signal, or content they posted)\n- ONE sentence value prop tied to their specific pain point\n- Soft CTA: 15-minute call, no pressure\n- Sign off: Kartik | Rioo\n- NEVER write: 'I hope this finds you well', 'touching base', 'circle back', 'synergy', 'leverage'\n- Sound like a founder writing at midnight, not a sales rep\n- No bullet points, no HTML, pure plain text"
+        }
+      },
+      "id": "2aa3ae82-3ec2-49df-834b-c17bdeb1dcdf",
+      "name": "Generate Outreach Email1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.75
+        }
+      },
+      "id": "eefa5d2c-0dcf-4931-b08f-b636a2fce5a7",
+      "name": "GPT \u2014 Outreach Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        224
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YoWg5i15AwBaWjTu",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"subject\": \"Subject line here\", \"body\": \"Full email body in plain text here. No HTML.\" }"
+      },
+      "id": "0eab806b-e9f3-447f-b2d0-843fead60c18",
+      "name": "Outreach Email Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Normalize Lead Data1').item.json.name }}",
+            "Title": "={{ $('Normalize Lead Data1').item.json.title }}",
+            "Company": "={{ $('Normalize Lead Data1').item.json.company }}",
+            "Profile URL": "={{ $('Normalize Lead Data1').item.json.profile_url }}",
+            "Email": "={{ $('Normalize Lead Data1').item.json.email }}",
+            "Followers": "={{ $('Normalize Lead Data1').item.json.followers_count }}",
+            "Source": "={{ $('Normalize Lead Data1').item.json.source }}",
+            "Score": "={{ $('AI Lead Qualifier1').item.json.output.score }}",
+            "Priority": "={{ $('AI Lead Qualifier1').item.json.output.priority }}",
+            "Temperature": "={{ $('AI Lead Qualifier1').item.json.output.temperature }}",
+            "Category": "={{ $('AI Lead Qualifier1').item.json.output.category }}",
+            "Pain Point": "={{ $('AI Lead Qualifier1').item.json.output.pain_point }}",
+            "Reasoning": "={{ $('AI Lead Qualifier1').item.json.output.reasoning }}",
+            "AI Email Subject": "={{ $('Generate Outreach Email1').item.json.output.subject }}",
+            "AI Email Body": "={{ $('Generate Outreach Email1').item.json.output.body }}",
+            "Stage": "Qualified",
+            "Status": "New",
+            "Follow Up Count": 0,
+            "Created At": "={{ $now.toISO() }}",
+            "Recomended Action": "={{ $('AI Lead Qualifier1').item.json.output.recommended_action }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Profile URL",
+              "displayName": "Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "low",
+                  "value": "low"
+                },
+                {
+                  "name": "medium",
+                  "value": "medium"
+                },
+                {
+                  "name": "high",
+                  "value": "high"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "hot",
+                  "value": "hot"
+                },
+                {
+                  "name": "warm",
+                  "value": "warm"
+                },
+                {
+                  "name": "cold",
+                  "value": "cold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "agency",
+                  "value": "agency"
+                },
+                {
+                  "name": "saas",
+                  "value": "saas"
+                },
+                {
+                  "name": "ecommerce",
+                  "value": "ecommerce"
+                },
+                {
+                  "name": "other",
+                  "value": "other"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Pain Point",
+              "displayName": "Pain Point",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recomended Action",
+              "displayName": "Recomended Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Subject",
+              "displayName": "AI Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Body",
+              "displayName": "AI Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Interested",
+                  "value": "Interested"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Emailed",
+                  "value": "Emailed"
+                },
+                {
+                  "name": "Followed Up",
+                  "value": "Followed Up"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Not Interested",
+                  "value": "Not Interested"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow Up Count",
+              "displayName": "Follow Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e78a74ce-500e-47c3-bc30-2a94f81bb7f4",
+      "name": "Store Lead in Airtable1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        112
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Normalize Lead Data1').item.json.email || \"kartik6jakhar@gmail.com\"}}",
+        "subject": "={{ $('Generate Outreach Email1').item.json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Generate Outreach Email1').item.json.output.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f8476250-2261-4225-b05f-ff0d1c3448dd",
+      "name": "Send Outreach Email1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        112
+      ],
+      "webhookId": "f56da520-9776-49dd-8dfb-da9fab9b757e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9KzZvmYqnKxqrj1h",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Store Lead in Airtable1').item.json.id }}",
+            "Stage": "Contacted",
+            "Status": "Emailed",
+            "Last Contacted": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5d4d317a-e93a-4210-93a2-32a4395979b8",
+      "name": "Update Stage \u2014 Contacted1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        112
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Normalize Lead Data1').item.json.name }}",
+            "Title": "={{ $('Normalize Lead Data1').item.json.title }}",
+            "Company": "={{ $('Normalize Lead Data1').item.json.company }}",
+            "Profile URL": "={{ $('Normalize Lead Data1').item.json.profile_url }}",
+            "Email": "={{ $('Normalize Lead Data1').item.json.email }}",
+            "Followers": "={{ $('Normalize Lead Data1').item.json.followers_count }}",
+            "Source": "={{ $('Normalize Lead Data1').item.json.source }}",
+            "Score": "={{ $('AI Lead Qualifier1').item.json.output.score }}",
+            "Priority": "={{ $('AI Lead Qualifier1').item.json.output.priority }}",
+            "Temperature": "={{ $('AI Lead Qualifier1').item.json.output.temperature }}",
+            "Category": "={{ $('AI Lead Qualifier1').item.json.output.category }}",
+            "Pain Point": "={{ $('AI Lead Qualifier1').item.json.output.pain_point }}",
+            "Reasoning": "={{ $('AI Lead Qualifier1').item.json.output.reasoning }}",
+            "Stage": "New",
+            "Status": "New",
+            "Follow Up Count": 0,
+            "Created At": "={{ $now.toISO() }}",
+            "Recomended Action": "={{ $json.output.recommended_action }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Profile URL",
+              "displayName": "Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "low",
+                  "value": "low"
+                },
+                {
+                  "name": "medium",
+                  "value": "medium"
+                },
+                {
+                  "name": "high",
+                  "value": "high"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "hot",
+                  "value": "hot"
+                },
+                {
+                  "name": "warm",
+                  "value": "warm"
+                },
+                {
+                  "name": "cold",
+                  "value": "cold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "agency",
+                  "value": "agency"
+                },
+                {
+                  "name": "saas",
+                  "value": "saas"
+                },
+                {
+                  "name": "ecommerce",
+                  "value": "ecommerce"
+                },
+                {
+                  "name": "other",
+                  "value": "other"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Pain Point",
+              "displayName": "Pain Point",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recomended Action",
+              "displayName": "Recomended Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Subject",
+              "displayName": "AI Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Body",
+              "displayName": "AI Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Interested",
+                  "value": "Interested"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Emailed",
+                  "value": "Emailed"
+                },
+                {
+                  "name": "Followed Up",
+                  "value": "Followed Up"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Not Interested",
+                  "value": "Not Interested"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow Up Count",
+              "displayName": "Follow Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "dc0944e7-a300-4491-b4b6-9b3b5cf1f0d9",
+      "name": "Store Low Score (No Outreach)1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        592
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 12
+            }
+          ]
+        }
+      },
+      "id": "eb88c53a-cd2f-489d-92be-ba46bffa931f",
+      "name": "SCHEDULE \u2014 Follow-Up Every 12h1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2128,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "filterByFormula": "=AND({Stage}=\"Contacted\", {Follow Up Count}<3, {Email}!=\"\", DATETIME_DIFF(NOW(), DATETIME_PARSE({Last Contacted}), 'days') >= 2)",
+        "options": {}
+      },
+      "id": "822c4de1-4f23-40c3-9f1f-851284a90da6",
+      "name": "Get Leads Due Follow-Up1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1904,
+        880
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write follow-up email number {{ ($json.fields['Follow Up Count'] || 0) + 1 }}.\n\nName: {{ $json.fields.Name }}\nTitle: {{ $json.fields.Title }}\nCompany: {{ $json.fields.Company }}\nPain Point: {{ $json.fields['Pain Point'] }}\nCategory: {{ $json.fields.Category }}\nFollow-up number: {{ ($json.fields['Follow Up Count'] || 0) + 1 }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Write follow-up emails for Rioo \u2014 AI OS for founders.\n\nRules per follow-up number:\n1 (day 2): Acknowledge they're busy. New angle \u2014 share ONE specific result or insight about what AIOS does for their category. Max 80 words.\n2 (day 5): Make it dead simple \u2014 ask if this is even relevant for them. Offer to send a 2-min loom. Max 65 words.\n3 (day 10): The respectful goodbye. No pressure, leave door open, remove them from sequence after this. Max 50 words.\n\nTone: Human, direct, zero fluff. Never reference the previous emails explicitly. Sign as Kartik | Rioo. Plain text only."
+        }
+      },
+      "id": "ace1f7a5-2dd2-42ad-b058-5cfaeea0758e",
+      "name": "Generate Follow-Up Email1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1680,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "2c27827c-353a-45de-9dc3-f38bd5688ee6",
+      "name": "GPT \u2014 Follow-Up Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1664,
+        1104
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YoWg5i15AwBaWjTu",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"subject\": \"Follow-up subject line\", \"body\": \"Follow-up body in plain text.\" }"
+      },
+      "id": "2f2cc511-f526-419f-8a33-b0f9d6162b1f",
+      "name": "Follow-Up Email Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1536,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.fields.Email || \"kartik6jakhar@gmail.com\"}}",
+        "subject": "={{ $('Generate Follow-Up Email1').item.json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Generate Follow-Up Email1').item.json.output.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "03a667b3-bc39-425e-b072-991b934b9c2e",
+      "name": "Send Follow-Up Email1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1328,
+        880
+      ],
+      "webhookId": "37e5b4c3-b3b2-4266-90d6-91b2aa431701",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9KzZvmYqnKxqrj1h",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Get Leads Due Follow-Up1').item.json.id }}",
+            "Status": "Followed Up",
+            "Last Contacted": "={{ $now.toISO() }}",
+            "Follow Up Count": "={{ ($('Get Leads Due Follow-Up1').item.json.fields['Follow Up Count'] || 0) + 1 }}",
+            "Score": 0,
+            "Followers": 0
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Profile URL",
+              "displayName": "Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "low",
+                  "value": "low"
+                },
+                {
+                  "name": "medium",
+                  "value": "medium"
+                },
+                {
+                  "name": "high",
+                  "value": "high"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "hot",
+                  "value": "hot"
+                },
+                {
+                  "name": "warm",
+                  "value": "warm"
+                },
+                {
+                  "name": "cold",
+                  "value": "cold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "agency",
+                  "value": "agency"
+                },
+                {
+                  "name": "saas",
+                  "value": "saas"
+                },
+                {
+                  "name": "ecommerce",
+                  "value": "ecommerce"
+                },
+                {
+                  "name": "other",
+                  "value": "other"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Pain Point",
+              "displayName": "Pain Point",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recomended Action",
+              "displayName": "Recomended Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Subject",
+              "displayName": "AI Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Body",
+              "displayName": "AI Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Interested",
+                  "value": "Interested"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Emailed",
+                  "value": "Emailed"
+                },
+                {
+                  "name": "Followed Up",
+                  "value": "Followed Up"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Not Interested",
+                  "value": "Not Interested"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow Up Count",
+              "displayName": "Follow Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "67496d6b-83d1-4cec-ac5e-9296d46aaeb8",
+      "name": "Update Follow-Up Count1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1104,
+        880
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "id": "cca8f639-8b1d-43ed-99d7-3d13a1766570",
+      "name": "GMAIL TRIGGER \u2014 Watch Inbox1",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2128,
+        1456
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9KzZvmYqnKxqrj1h",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "not-own",
+              "leftValue": "={{ $json.from.value[0].address }}",
+              "rightValue": "kartikjakhar09@gmail.com",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bf9e7d57-5244-4f9c-bda2-e14f2329f676",
+      "name": "Filter \u2014 Ignore Own Emails1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1904,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "filterByFormula": "={{ \"{Email}='\" + ($('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.From.match(/<(.+)>/)?.[1] || $('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.From) + \"'\" }}",
+        "options": {}
+      },
+      "id": "3699eaf0-30b1-4d2c-8c0d-13c7ac297881",
+      "name": "Match Lead by Email1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1680,
+        1456
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "found",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "057d1131-4b90-4cd9-8217-5ae742d321e1",
+      "name": "Lead Found in CRM?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1456,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify this reply from a sales prospect.\n\nReply text: {{ $('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.text || $('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.snippet }}\n\nProspect: {{ $('Match Lead by Email1').item.json.fields.Name }} from {{ $('Match Lead by Email1').item.json.fields.Company }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Classify email replies from sales prospects. Be generous \u2014 lean toward INTERESTED for any ambiguous positive signal.\n\nCategories:\n- INTERESTED: Any positive or curious response \u2014 'sounds interesting', 'tell me more', 'how does it work', 'open to a chat', asks about pricing, timing, or process\n- NOT_INTERESTED: Clear no \u2014 unsubscribe, not relevant, remove me, not the right time\n- QUESTION: Has a specific question that needs an answer\n- OUT_OF_OFFICE: Auto-reply or out of office message\n- OTHER: Doesn't fit above\n\nReturn only the JSON."
+        }
+      },
+      "id": "30929179-59a7-490f-929b-f50e6faa3e12",
+      "name": "AI \u2014 Classify Reply1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1232,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "f0c7b247-b156-47c7-bce6-9bbff12075d3",
+      "name": "GPT \u2014 Classifier Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1216,
+        1680
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YoWg5i15AwBaWjTu",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"classification\": \"INTERESTED\", \"reason\": \"Brief reason max 10 words\" }"
+      },
+      "id": "1db14b12-6c01-41b5-bd32-6cea4d3d288b",
+      "name": "Classification Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1088,
+        1680
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-int",
+              "leftValue": "={{ $json.output.classification }}",
+              "rightValue": "INTERESTED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "20e825ec-5373-4e30-924c-a0fac440076c",
+      "name": "Interested?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -880,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a warm reply to this interested prospect.\n\nTheir reply: {{ $('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.text || $('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.snippet }}\n\nProspect name: {{ $('Match Lead by Email1').item.json.fields.Name }}\nCompany: {{ $('Match Lead by Email1').item.json.fields.Company }}\nCategory: {{ $('Match Lead by Email1').item.json.fields.Category }}\nPain Point: {{ $('Match Lead by Email1').item.json.fields['Pain Point'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Write a reply email for an interested Rioo prospect.\n\nGoal: confirm their interest and get them to book a 15-minute call.\n\nRules:\n- Max 100 words\n- Acknowledge what they said specifically (1 sentence)\n- One line about what the call covers: quick look at how AIOS would work for their specific situation\n- Include Calendly link naturally: https://calendly.com/kartik6jakhar/30min\n- Warm and genuine, NOT salesy or desperate\n- Sign as: Kartik | Rioo\n- Subject starts with Re:\n- Plain text only"
+        }
+      },
+      "id": "24e98e54-3752-4b90-848d-86f3f7149617",
+      "name": "Generate Reply + Calendly1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -656,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "ffa61b83-b032-4656-bf4e-08171a8c0dde",
+      "name": "GPT \u2014 Reply Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        1440
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YoWg5i15AwBaWjTu",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"subject\": \"Re: original subject\", \"body\": \"Reply body with Calendly link embedded naturally.\" }"
+      },
+      "id": "c1d62d83-5a09-40eb-853b-39e7ba68b534",
+      "name": "Reply Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -512,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('GMAIL TRIGGER \u2014 Watch Inbox1').item.json.from.value[0].address || \"kartik6jakhar@gmail.com\"}}",
+        "subject": "={{ $('Generate Reply + Calendly1').item.json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Generate Reply + Calendly1').item.json.output.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "46f69605-7953-4cb9-a60a-6322de9ae02e",
+      "name": "Send Reply with Calendly1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -304,
+        1312
+      ],
+      "webhookId": "caa3641e-be78-4fd5-9d9d-7532b03cc6fe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9KzZvmYqnKxqrj1h",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Match Lead by Email1').item.json.id }}",
+            "Stage": "Interested",
+            "Status": "Replied",
+            "Last Contacted": "={{ $now.toISO() }}",
+            "Follow Up Count": 0,
+            "Score": 0,
+            "Followers": 0
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Profile URL",
+              "displayName": "Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "low",
+                  "value": "low"
+                },
+                {
+                  "name": "medium",
+                  "value": "medium"
+                },
+                {
+                  "name": "high",
+                  "value": "high"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "hot",
+                  "value": "hot"
+                },
+                {
+                  "name": "warm",
+                  "value": "warm"
+                },
+                {
+                  "name": "cold",
+                  "value": "cold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "agency",
+                  "value": "agency"
+                },
+                {
+                  "name": "saas",
+                  "value": "saas"
+                },
+                {
+                  "name": "ecommerce",
+                  "value": "ecommerce"
+                },
+                {
+                  "name": "other",
+                  "value": "other"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Pain Point",
+              "displayName": "Pain Point",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recomended Action",
+              "displayName": "Recomended Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Subject",
+              "displayName": "AI Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Body",
+              "displayName": "AI Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Interested",
+                  "value": "Interested"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Emailed",
+                  "value": "Emailed"
+                },
+                {
+                  "name": "Followed Up",
+                  "value": "Followed Up"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Not Interested",
+                  "value": "Not Interested"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow Up Count",
+              "displayName": "Follow Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ed750914-66f8-438e-8d0b-46d4a7c81b37",
+      "name": "Update Stage \u2014 Interested1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        1312
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Match Lead by Email1').item.json.id }}",
+            "Stage": "Replied",
+            "Status": "Not Interested",
+            "Last Contacted": "={{ $now.toISO() }}",
+            "Follow Up Count": 0,
+            "Score": 0,
+            "Followers": 0
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Profile URL",
+              "displayName": "Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "low",
+                  "value": "low"
+                },
+                {
+                  "name": "medium",
+                  "value": "medium"
+                },
+                {
+                  "name": "high",
+                  "value": "high"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "hot",
+                  "value": "hot"
+                },
+                {
+                  "name": "warm",
+                  "value": "warm"
+                },
+                {
+                  "name": "cold",
+                  "value": "cold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "agency",
+                  "value": "agency"
+                },
+                {
+                  "name": "saas",
+                  "value": "saas"
+                },
+                {
+                  "name": "ecommerce",
+                  "value": "ecommerce"
+                },
+                {
+                  "name": "other",
+                  "value": "other"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Pain Point",
+              "displayName": "Pain Point",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recomended Action",
+              "displayName": "Recomended Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Subject",
+              "displayName": "AI Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Body",
+              "displayName": "AI Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Interested",
+                  "value": "Interested"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Emailed",
+                  "value": "Emailed"
+                },
+                {
+                  "name": "Followed Up",
+                  "value": "Followed Up"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Not Interested",
+                  "value": "Not Interested"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow Up Count",
+              "displayName": "Follow Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7785c606-15c3-4c5f-be68-22c912708a12",
+      "name": "Update Stage \u2014 Not Interested1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -592,
+        1616
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "options": {}
+      },
+      "id": "5774ae2e-6ede-4b8c-8ba2-e1a4ded97365",
+      "name": "Dashboard \u2014 Fetch All Leads1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1904,
+        1840
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const leads = $input.all().map(item => ({\n  id: item.json.id,\n  name: item.json.fields.Name || '',\n  title: item.json.fields.Title || '',\n  company: item.json.fields.Company || '',\n  email: item.json.fields.Email || '',\n  score: item.json.fields.Score || 0,\n  priority: item.json.fields.Priority || 'low',\n  temperature: item.json.fields.Temperature || 'cold',\n  category: item.json.fields.Category || '',\n  stage: item.json.fields.Stage || 'New',\n  status: item.json.fields.Status || 'New',\n  pain_point: item.json.fields['Pain Point'] || '',\n  reasoning: item.json.fields.Reasoning || '',\n  ai_email_subject: item.json.fields['AI Email Subject'] || '',\n  follow_up_count: item.json.fields['Follow Up Count'] || 0,\n  last_contacted: item.json.fields['Last Contacted'] || '',\n  created_at: item.json.fields['Created At'] || '',\n  profile_url: item.json.fields['Profile URL'] || ''\n}));\nreturn [{ json: { leads, total: leads.length, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "3fde8b13-df02-49bc-a6ce-39b00d002ac2",
+      "name": "Dashboard \u2014 Format Leads Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1680,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "710bb558-b270-4385-9f8e-cd62f5faac2a",
+      "name": "Dashboard \u2014 Respond Leads1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1456,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "options": {}
+      },
+      "id": "74671d8e-89c4-4161-b0f3-fb7b9160054a",
+      "name": "Stats \u2014 Fetch All for Count1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1904,
+        2064
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst stageCount = {};\nconst tempCount = { hot: 0, warm: 0, cold: 0 };\nlet totalScore = 0;\nall.forEach(item => {\n  const f = item.json.fields;\n  const stage = f.Stage || 'New';\n  stageCount[stage] = (stageCount[stage] || 0) + 1;\n  const temp = (f.Temperature || 'cold').toLowerCase();\n  if (tempCount[temp] !== undefined) tempCount[temp]++;\n  totalScore += (f.Score || 0);\n});\nconst total = all.length;\nreturn [{ json: {\n  total_leads: total,\n  pipeline: {\n    new: stageCount['New'] || 0,\n    qualified: stageCount['Qualified'] || 0,\n    contacted: stageCount['Contacted'] || 0,\n    replied: stageCount['Replied'] || 0,\n    interested: stageCount['Interested'] || 0,\n    booked: stageCount['Booked'] || 0,\n    closed: stageCount['Closed'] || 0\n  },\n  temperature: tempCount,\n  avg_score: total > 0 ? Math.round(totalScore / total) : 0,\n  conversion_rate: total > 0 ? Math.round(((stageCount['Interested'] || 0) + (stageCount['Booked'] || 0) + (stageCount['Closed'] || 0)) / total * 100) : 0,\n  timestamp: new Date().toISOString()\n}}];"
+      },
+      "id": "6240d83f-0770-40cd-a657-4412b339e124",
+      "name": "Stats \u2014 Compute Pipeline Counts1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1680,
+        2064
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "dfc086bb-3f26-443b-8f05-548d1acd8faa",
+      "name": "Stats \u2014 Respond1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1456,
+        2064
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRB6D2jBWzDIlDJ",
+          "mode": "list",
+          "cachedResultName": "ErrorXagents - Demo",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXllEAdVzE3NbqN",
+          "mode": "list",
+          "cachedResultName": "ErrorX-CRM",
+          "cachedResultUrl": "https://airtable.com/appRB6D2jBWzDIlDJ/tblXllEAdVzE3NbqN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.body.record_id }}",
+            "Stage": "={{ $json.body.stage }}",
+            "Status": "=",
+            "Follow Up Count": 0,
+            "Score": 0,
+            "Followers": 0
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Profile URL",
+              "displayName": "Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "low",
+                  "value": "low"
+                },
+                {
+                  "name": "medium",
+                  "value": "medium"
+                },
+                {
+                  "name": "high",
+                  "value": "high"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "hot",
+                  "value": "hot"
+                },
+                {
+                  "name": "warm",
+                  "value": "warm"
+                },
+                {
+                  "name": "cold",
+                  "value": "cold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "agency",
+                  "value": "agency"
+                },
+                {
+                  "name": "saas",
+                  "value": "saas"
+                },
+                {
+                  "name": "ecommerce",
+                  "value": "ecommerce"
+                },
+                {
+                  "name": "other",
+                  "value": "other"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Pain Point",
+              "displayName": "Pain Point",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recomended Action",
+              "displayName": "Recomended Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Subject",
+              "displayName": "AI Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Email Body",
+              "displayName": "AI Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Interested",
+                  "value": "Interested"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Emailed",
+                  "value": "Emailed"
+                },
+                {
+                  "name": "Followed Up",
+                  "value": "Followed Up"
+                },
+                {
+                  "name": "Replied",
+                  "value": "Replied"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Not Interested",
+                  "value": "Not Interested"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow Up Count",
+              "displayName": "Follow Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "98a582de-9594-407d-a88f-179d55e68252",
+      "name": "Manual Stage Override1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1904,
+        2288
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ls2Z4FVEBtUruLEN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"updated\", \"record_id\": \"{{ $('WEBHOOK \u2014 Update Lead Stage1').item.json.body.record_id }}\", \"new_stage\": \"{{ $('WEBHOOK \u2014 Update Lead Stage1').item.json.body.stage }}\" }",
+        "options": {}
+      },
+      "id": "baa11b33-2079-4af7-b227-08343947b933",
+      "name": "Stage Update Response1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1680,
+        2288
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1248,
+        464
+      ],
+      "id": "3f585b46-323e-4bdf-8f16-7012096c64f4",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst sd = $getWorkflowStaticData('global');\nif (!sd.runReport) {\n  sd.runReport = { leads_captured: [], leads_duplicated: [], emails_sent: [] };\n}\n\nconst norm   = $('Normalize Lead Data1').item.json;\nconst ai     = $('AI Lead Qualifier1').item.json.output;\nconst email  = $('Generate Outreach Email1').item.json.output;\nconst sentTo = norm.email || 'kartik6jakhar@gmail.com';\n\nsd.runReport.leads_captured.push({\n  name:               norm.name        || 'Unknown',\n  title:              norm.title       || '',\n  company:            norm.company     || '',\n  profile_url:        norm.profile_url || '',\n  email:              sentTo,\n  score:              ai.score,\n  priority:           ai.priority,\n  temperature:        ai.temperature,\n  category:           ai.category,\n  pain_point:         ai.pain_point    || '',\n  stage:              'Contacted',\n  email_sent:         true,\n  email_subject:      email?.subject   || '',\n  airtable_record_id: $('Store Lead in Airtable1').item.json.id || ''\n});\n\nsd.runReport.emails_sent.push({\n  name:    norm.name || 'Unknown',\n  email:   sentTo,\n  subject: email?.subject || ''\n});\n\nreturn [{ json: { _loopContinue: true } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        112
+      ],
+      "id": "f14b8641-39a4-4740-8688-2a814dee833b",
+      "name": "Tag \u2014 Contacted"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst sd = $getWorkflowStaticData('global');\nif (!sd.runReport) {\n  sd.runReport = { leads_captured: [], leads_duplicated: [], emails_sent: [] };\n}\n\nconst norm = $('Normalize Lead Data1').item.json;\nconst ai   = $('AI Lead Qualifier1').item.json.output;\n\nsd.runReport.leads_captured.push({\n  name:               norm.name        || 'Unknown',\n  title:              norm.title       || '',\n  company:            norm.company     || '',\n  profile_url:        norm.profile_url || '',\n  email:              norm.email       || '',\n  score:              ai.score,\n  priority:           ai.priority,\n  temperature:        ai.temperature,\n  category:           ai.category,\n  pain_point:         ai.pain_point    || '',\n  stage:              'New',\n  email_sent:         false,\n  email_subject:      '',\n  airtable_record_id: $('Store Low Score (No Outreach)1').item.json.id || ''\n});\n\nreturn [{ json: { _loopContinue: true } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        592
+      ],
+      "id": "eb79a642-c644-4cd6-a25b-a61051033b6b",
+      "name": "Tag \u2014 Low Score"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst sd = $getWorkflowStaticData('global');\nif (!sd.runReport) {\n  sd.runReport = { leads_captured: [], leads_duplicated: [], emails_sent: [] };\n}\n\nconst norm = $('Normalize Lead Data1').item.json;\n\nsd.runReport.leads_duplicated.push({\n  name:        norm.name        || 'Unknown',\n  profile_url: norm.profile_url || '',\n  email:       norm.email       || ''\n});\n\nreturn [{ json: { _loopContinue: true } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        560
+      ],
+      "id": "5119d962-b64b-416d-bb10-6e7ccf411210",
+      "name": "Tag \u2014 Duplicate"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst sd     = $getWorkflowStaticData('global');\nconst report = sd.runReport || { leads_captured: [], leads_duplicated: [], emails_sent: [] };\n\nconst captured   = report.leads_captured   || [];\nconst duplicated = report.leads_duplicated || [];\nconst emailsSent = report.emails_sent      || [];\n\nconst summary = {\n  status: 'completed',\n  run_at: new Date().toISOString(),\n  stats: {\n    total_incoming:   captured.length + duplicated.length,\n    leads_captured:   captured.length,\n    leads_duplicated: duplicated.length,\n    emails_sent:      emailsSent.length,\n    by_temperature: {\n      hot:  captured.filter(l => l.temperature === 'hot').length,\n      warm: captured.filter(l => l.temperature === 'warm').length,\n      cold: captured.filter(l => l.temperature === 'cold').length\n    },\n    by_stage: {\n      contacted: captured.filter(l => l.stage === 'Contacted').length,\n      new_only:  captured.filter(l => l.stage === 'New').length\n    }\n  },\n  emails_sent_to: emailsSent.map(e => ({\n    name:    e.name,\n    email:   e.email,\n    subject: e.subject\n  })),\n  leads: captured.map(l => ({\n    name:        l.name,\n    title:       l.title,\n    company:     l.company,\n    profile_url: l.profile_url,\n    email:       l.email,\n    score:       l.score,\n    priority:    l.priority,\n    temperature: l.temperature,\n    category:    l.category,\n    pain_point:  l.pain_point,\n    stage:       l.stage,\n    email_sent:  l.email_sent,\n    record_id:   l.airtable_record_id\n  })),\n  duplicates_skipped: duplicated.map(d => ({\n    name:        d.name,\n    profile_url: d.profile_url\n  }))\n};\n\n// Reset for next run\nsd.runReport = { leads_captured: [], leads_duplicated: [], emails_sent: [] };\n\nreturn [{ json: summary }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        464
+      ],
+      "id": "04b4f51c-321d-4d8d-908d-7b99431809d5",
+      "name": "Build Run Report"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        464
+      ],
+      "id": "eb845b82-2b59-4813-8f3b-ee7e5f006e88",
+      "name": "Respond \u2014 Final Report"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WEBHOOK \u2014 Ingest Manual Lead1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEBHOOK \u2014 Trigger Apify Scrape1": {
+      "main": [
+        [
+          {
+            "node": "Parse Apify Params1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEBHOOK \u2014 Dashboard: All Leads1": {
+      "main": [
+        [
+          {
+            "node": "Dashboard \u2014 Fetch All Leads1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEBHOOK \u2014 Dashboard: Pipeline Stats1": {
+      "main": [
+        [
+          {
+            "node": "Stats \u2014 Fetch All for Count1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEBHOOK \u2014 Update Lead Stage1": {
+      "main": [
+        [
+          {
+            "node": "Manual Stage Override1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Apify Params1": {
+      "main": [
+        [
+          {
+            "node": "Fetch LinkedIn via Apify1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch LinkedIn via Apify1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Lead Data1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Check1": {
+      "main": [
+        [
+          {
+            "node": "Is New Lead?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Lead?1": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Qualifier1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag \u2014 Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Qualifier1": {
+      "main": [
+        [
+          {
+            "node": "Score 60+?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT \u2014 Qualifier Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Lead Qualifier1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualifier Structured Output1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Lead Qualifier1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score 60+?1": {
+      "main": [
+        [
+          {
+            "node": "Generate Outreach Email1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store Low Score (No Outreach)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Outreach Email1": {
+      "main": [
+        [
+          {
+            "node": "Store Lead in Airtable1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT \u2014 Outreach Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Outreach Email1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outreach Email Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Outreach Email1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Lead in Airtable1": {
+      "main": [
+        [
+          {
+            "node": "Send Outreach Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Outreach Email1": {
+      "main": [
+        [
+          {
+            "node": "Update Stage \u2014 Contacted1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Stage \u2014 Contacted1": {
+      "main": [
+        [
+          {
+            "node": "Tag \u2014 Contacted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Low Score (No Outreach)1": {
+      "main": [
+        [
+          {
+            "node": "Tag \u2014 Low Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SCHEDULE \u2014 Follow-Up Every 12h1": {
+      "main": [
+        [
+          {
+            "node": "Get Leads Due Follow-Up1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Leads Due Follow-Up1": {
+      "main": [
+        [
+          {
+            "node": "Generate Follow-Up Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Follow-Up Email1": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-Up Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT \u2014 Follow-Up Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Follow-Up Email1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-Up Email Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Follow-Up Email1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow-Up Email1": {
+      "main": [
+        [
+          {
+            "node": "Update Follow-Up Count1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GMAIL TRIGGER \u2014 Watch Inbox1": {
+      "main": [
+        [
+          {
+            "node": "Filter \u2014 Ignore Own Emails1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter \u2014 Ignore Own Emails1": {
+      "main": [
+        [
+          {
+            "node": "Match Lead by Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Lead by Email1": {
+      "main": [
+        [
+          {
+            "node": "Lead Found in CRM?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Found in CRM?1": {
+      "main": [
+        [
+          {
+            "node": "AI \u2014 Classify Reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI \u2014 Classify Reply1": {
+      "main": [
+        [
+          {
+            "node": "Interested?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT \u2014 Classifier Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI \u2014 Classify Reply1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classification Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI \u2014 Classify Reply1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interested?1": {
+      "main": [
+        [
+          {
+            "node": "Generate Reply + Calendly1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Stage \u2014 Not Interested1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Reply + Calendly1": {
+      "main": [
+        [
+          {
+            "node": "Send Reply with Calendly1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT \u2014 Reply Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Reply + Calendly1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Reply + Calendly1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reply with Calendly1": {
+      "main": [
+        [
+          {
+            "node": "Update Stage \u2014 Interested1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dashboard \u2014 Fetch All Leads1": {
+      "main": [
+        [
+          {
+            "node": "Dashboard \u2014 Format Leads Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dashboard \u2014 Format Leads Response1": {
+      "main": [
+        [
+          {
+            "node": "Dashboard \u2014 Respond Leads1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stats \u2014 Fetch All for Count1": {
+      "main": [
+        [
+          {
+            "node": "Stats \u2014 Compute Pipeline Counts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stats \u2014 Compute Pipeline Counts1": {
+      "main": [
+        [
+          {
+            "node": "Stats \u2014 Respond1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Stage Override1": {
+      "main": [
+        [
+          {
+            "node": "Stage Update Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Build Run Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dedup Check1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag \u2014 Contacted": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag \u2014 Low Score": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag \u2014 Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Run Report": {
+      "main": [
+        [
+          {
+            "node": "Respond \u2014 Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ce26167c-0dbb-445a-a307-3e743b4bd4b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e38730e4f7de543f3fd01b7629e51a3a2fff2a5853e810e1ff5eb77df1af93cb"
+  },
+  "id": "XysuMvZVwA9JV4ue",
+  "tags": []
+}
